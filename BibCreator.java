@@ -11,6 +11,7 @@ public class BibCreator {
 	static int filecounter=1,countfile=1;
 	
 	public static void processFilesForValidation() {
+		System.out.println("File " + filecounter);
 		PrintWriter pw1 = null, pw2 = null, pw3 = null;	
 		try
 		{
@@ -27,15 +28,14 @@ public class BibCreator {
 			System.exit(0);			   		   
 		}
 
-
-		String author1 =	author.replaceAll(" and", ",");
+		String author1 = author.replaceAll(" and", ",");
 		int andIndex = author.indexOf("and");
 		String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al.") : author;
 		String author3 = author.replaceAll("and", "&");
 
 		pw1.println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
 		pw1.close();
-		pw2.println("["+filecounter+"]"+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
+		pw2.println("[" + filecounter + "] "+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
 		pw2.close();
 		pw3.println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
 		pw3.close();
@@ -43,11 +43,13 @@ public class BibCreator {
 	}
 	
 	public static void format(String s) {
-		if (s.startsWith("@") || s.indexOf('=') == -1)
+		if (s.indexOf('=') == -1) {
+			//System.out.println("FORMAT LINE: " + s);
 			return;
+		}
 
 		String key = s.substring(0, s.indexOf('='));
-		String value = s.substring(s.indexOf('{'), s.indexOf('}') - 1);
+		String value = s.substring(s.indexOf('{') + 1, s.indexOf('}'));
 
 		switch(key) {
 		case "author":  
@@ -81,7 +83,8 @@ public class BibCreator {
 			month = value;
 			break;
 		default:
-			System.out.println("No case matched");
+			// Do nothing.
+			//System.out.println("No case matched");
 		}
 
 	} 
@@ -106,24 +109,17 @@ public class BibCreator {
 				System.exit(0);			   
 			}
 
-
-			int count=0;
 			String s;
+			filecounter = 1;
 			while(sc.hasNextLine()) {
-
-				s=sc.nextLine();
-				if(s.length()==0 || s.length()==1 ) 
-					continue;
-				else {
-					format(s);
-					count++;
-					if(count == 13) {
-						processFilesForValidation();
-						System.out.println("hello1");
-						filecounter=0;
-						count=0;
+				s = sc.nextLine();
+				if(s.startsWith("@ARTICLE{")) {
+					while (!s.equals("}")) {
+						s = sc.nextLine();
+						format(s);
 					}
-				}		    
+					processFilesForValidation();
+				}	
 			}
 			System.out.println("hello2");
 			countfile++;
