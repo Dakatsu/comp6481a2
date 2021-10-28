@@ -42,13 +42,19 @@ public class BibCreator {
 		filecounter++;
 	}
 	
-	public static void format(String s) {
+	public static void format(String s) throws FileInvalidException {
 		if (s.indexOf('=') == -1) {
 			//System.out.println("FORMAT LINE: " + s);
 			return;
 		}
+		
+		// Handles empty field.
+		if (s.indexOf('{') == -1 || s.indexOf('}') == -1 || s.indexOf('}') - s.indexOf('{') < 2) {
+			throw new FileInvalidException();
+		}
 
 		String key = s.substring(0, s.indexOf('='));
+		System.out.println(s.indexOf('{') + ", " + s.indexOf('}'));
 		String value = s.substring(s.indexOf('{') + 1, s.indexOf('}'));
 
 		switch(key) {
@@ -116,7 +122,13 @@ public class BibCreator {
 				if(s.startsWith("@ARTICLE{")) {
 					while (!s.equals("}")) {
 						s = sc.nextLine();
-						format(s);
+						try {
+							format(s);
+						}
+						catch (FileInvalidException e) {
+							System.out.println("TODO EXCEPTION");
+							System.exit(0);
+						}
 					}
 					processFilesForValidation();
 				}	
