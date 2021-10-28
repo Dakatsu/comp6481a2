@@ -48,25 +48,15 @@ public class BibCreator {
 		
 		StringBuilder sb = new StringBuilder();
 		char[] arr = s.toCharArray();
-		int i=0; 
-		String name="";
 		if (Character.isDigit(arr[1]) || arr[0] == 'k')
 			return;
 
-		while(arr[i]!= '=') {
-			name = name + arr[i];
-			i++;
-		}
+		String name = s.substring(0, s.indexOf('='));
 		int l=name.length();
 
 		switch(name) {
 		case "author":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			author=sb.toString();
+			author = s.substring(s.indexOf('{'), s.indexOf('}') - 1);
 			break;
 
 		case "journal":  
