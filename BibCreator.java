@@ -11,7 +11,7 @@ public class BibCreator {
 	static int filecounter=1,countfile=1;
 	
 	public static void processFilesForValidation() {
-		PrintWriter pw1 = null,pw2=null,pw3=null;	
+		PrintWriter pw1 = null, pw2 = null, pw3 = null;	
 		try
 		{
 			pw1 = new PrintWriter(new FileOutputStream("IEEE" + countfile + ".txt", true));
@@ -29,25 +29,28 @@ public class BibCreator {
 
 
 		String author1 =	author.replaceAll(" and", ",");
-		int index = author.indexOf("and");
-		String author2 = index != -1 ? author.replaceAll(author.substring(index,author.length()), "et al.") : author;
+		int andIndex = author.indexOf("and");
+		String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al.") : author;
 		String author3 = author.replaceAll("and", "&");
 
 		pw1.println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
-		pw2.println("[" + filecounter + "]"+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
-		pw3.println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
 		pw1.close();
+		pw2.println("["+filecounter+"]"+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
 		pw2.close();
+		pw3.println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
 		pw3.close();
 		filecounter++;
 	}
 	
 	public static void format(String s) {
+		if (s.startsWith("@"))
+			return;
+		
 		StringBuilder sb = new StringBuilder();
 		char[] arr = s.toCharArray();
 		int i=0; 
 		String name="";
-		if (arr[0] == '@' || Character.isDigit(arr[1]) || arr[0] == 'k')
+		if (Character.isDigit(arr[1]) || arr[0] == 'k')
 			return;
 
 		while(arr[i]!= '=') {
@@ -145,7 +148,6 @@ public class BibCreator {
 	} 
 	
 	public static void main(String[] args) {
-		String s;
 		Scanner sc = null;		// A scanner object ,
 		while(countfile<=10) {
 			try
@@ -167,6 +169,7 @@ public class BibCreator {
 
 
 			int count=0;
+			String s;
 			while(sc.hasNextLine()) {
 
 				s=sc.nextLine();
@@ -188,8 +191,7 @@ public class BibCreator {
 			System.out.println("hello3");
 		}
 		sc.close();
-
-
+		System.out.println("All files processed!");
 	}
 
 }
