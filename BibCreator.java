@@ -43,11 +43,7 @@ public class BibCreator {
 	}
 	
 	public static void format(String s) {
-		if (s.startsWith("@"))
-			return;
-
-		char[] arr = s.toCharArray();
-		if (Character.isDigit(arr[1]) || arr[0] == 'k')
+		if (s.startsWith("@") || s.indexOf('=') == -1)
 			return;
 
 		String key = s.substring(0, s.indexOf('='));
