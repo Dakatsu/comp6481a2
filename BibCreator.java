@@ -45,91 +45,44 @@ public class BibCreator {
 	public static void format(String s) {
 		if (s.startsWith("@"))
 			return;
-		
-		StringBuilder sb = new StringBuilder();
+
 		char[] arr = s.toCharArray();
 		if (Character.isDigit(arr[1]) || arr[0] == 'k')
 			return;
 
-		String name = s.substring(0, s.indexOf('='));
-		int l=name.length();
+		String key = s.substring(0, s.indexOf('='));
+		String value = s.substring(s.indexOf('{'), s.indexOf('}') - 1);
 
-		switch(name) {
+		switch(key) {
 		case "author":  
-			author = s.substring(s.indexOf('{'), s.indexOf('}') - 1);
+			author = value;
 			break;
-
 		case "journal":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			journal=sb.toString();
+			journal = value;
 			break;
 		case "title":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			title=sb.toString();
+			title = value;
 			break;
 		case "year":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			year=sb.toString();
+			year = value;
 			break;
 		case "volume":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			volume=sb.toString();
+			volume = value;
 			break;
 		case "number":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			number=sb.toString();
+			number = value;
 			break;
 		case "pages":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			pages=sb.toString();
+			pages = value;
 			break;
 		case "doi":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			doi=sb.toString();
+			doi = value;
 			break;
 		case "ISSN":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			ISSN=sb.toString();
+			ISSN = value;
 			break;
 		case "month":  
-			while(arr[l+2] != '}') {
-				sb.append(arr[l+2]);
-
-				l++;
-			}
-			month=sb.toString();
+			month = value;
 			break;
 		default:
 			System.out.println("No case matched");
