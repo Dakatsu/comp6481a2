@@ -2,7 +2,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -47,7 +50,7 @@ public class BibCreator {
 						String author3 = author.replaceAll("and", "&");
 				
 						outWriters[i][0].println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
-						outWriters[i][1].println("[" + articleCount + "] "+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
+						outWriters[i][1].println("[" + articleCount + "]\t"+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
 						outWriters[i][2].println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
 						articleCount++;
 					}
@@ -187,7 +190,42 @@ public class BibCreator {
 		processFilesForValidation();
 		
 		// Allow the user to open and display one file.
+		Scanner keyboard = new Scanner(System.in);
 		System.out.println("Please enter the name of one of the files you need to review:");
+		BufferedReader inFile = null;
+		try {
+			inFile = new BufferedReader(new FileReader(keyboard.nextLine()));
+		}
+		catch (FileNotFoundException e) {
+			System.out.println("Could not open input file. File does not exist; possibly it could not be created!"
+					+ "\n\nHowever, you will be allowed another chance to enter another file name."
+					+ "\nPlease enter the name of one of the files that you need to review:");
+			try {
+				inFile = new BufferedReader(new FileReader(keyboard.nextLine()));
+			}
+			catch (FileNotFoundException e2) {
+				System.out.println("Sorry! I am unable to display your desired files! Program will exit!");
+				keyboard.close();
+				System.exit(0);
+			}
+		}
+		keyboard.close();
+		
+		// Display the file if successfully opened.
+		if (inFile != null) {
+			System.out.println("Here are the contents of the successfully created File:");
+			try {
+				String line = inFile.readLine();
+				while (line != null) {
+					System.out.println(line);
+					line = inFile.readLine();
+				}
+			} 
+			catch (IOException e) {
+				System.out.println("Exception occured when attempting to read file: " + e.getMessage());
+			}
+		}
+		System.out.println("Goodbye! Hope you have enjoyed creating the needed files using BibCreator.");
 	}
 
 }
