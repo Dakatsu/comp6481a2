@@ -63,18 +63,16 @@ public class BibCreator {
 						// Throw an exception if a field is missing.
 						if (author.isEmpty() || journal.isEmpty() || title.isEmpty() || year.isEmpty() || volume.isEmpty() 
 								|| number.isEmpty() || pages.isEmpty() || doi.isEmpty() || ISSN.isEmpty() || month.isEmpty()) {
-							throw new FileInvalidException("Field is missing.");
+							throw new FileInvalidException("One or more fields are missing.");
 						}
 						// Add the article to the file if valid.
-						System.out.println("File " + (i + 1) + "." + articleCount);
-				
 						String author1 = author.replaceAll(" and", ",");
 						int andIndex = author.indexOf("and");
 						String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al.") : author;
 						String author3 = author.replaceAll("and", "&");
 				
 						outWriters[i][0].println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
-						outWriters[i][1].println("[" + articleCount + "]\t"+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
+						outWriters[i][1].println("["+articleCount+"]\t"+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
 						outWriters[i][2].println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
 						articleCount++;
 					}	
@@ -86,7 +84,11 @@ public class BibCreator {
 			}
 			// If file is invalid, close and delete the output files.
 			catch (FileInvalidException e) {
-				System.out.println("Error: Detected Empty Field! " + (i + 1) + "." + articleCount + ": " + e.getMessage());
+				System.out.println("Error: Detected Empty Field!" 
+						       + "\n============================"
+			                   + "\nProblem detected with input file: Latex" + (i + 1) + ".bib"
+						       + "\nFile is invalid: " + e.getMessage() + " Processing stopped at this point. "
+						       + "Other empty/missing fields may be present as well.\n");
 				for (int j = 0; j < 3; j++) {
 					outWriters[i][j].close();
 					outFiles[i][j].delete();
@@ -113,7 +115,7 @@ public class BibCreator {
 		
 		// Handles empty field.
 		if (s.indexOf('{') == -1 || s.indexOf('}') == -1 || s.indexOf('}') - s.indexOf('{') < 2) {
-			throw new FileInvalidException("Empty field when reading key: " + key);
+			throw new FileInvalidException("Field \"" + key + "\" is empty.");
 		}
 
 		//System.out.println(s.indexOf('{') + ", " + s.indexOf('}'));
@@ -155,6 +157,7 @@ public class BibCreator {
 	} 
 	
 	public static void main(String[] args) {
+		System.out.println("Welcome to BibCreator!\n");
 		int numFiles = 10;
 		// Open every input file and store their scanners in an array.
 		inScanners = new Scanner[numFiles];
@@ -241,7 +244,7 @@ public class BibCreator {
 		
 		// Display the file if successfully opened.
 		if (inFile != null) {
-			System.out.println("Here are the contents of the successfully created File:");
+			System.out.println("Here are the contents of the successfully created File:\n");
 			try {
 				String line = inFile.readLine();
 				while (line != null) {
@@ -253,6 +256,6 @@ public class BibCreator {
 				System.out.println("Exception occured when attempting to read file: " + e.getMessage());
 			}
 		}
-		System.out.println("Goodbye! Hope you have enjoyed creating the needed files using BibCreator.");
+		System.out.println("\nGoodbye! Hope you have enjoyed creating the needed files using BibCreator.");
 	}
 }
