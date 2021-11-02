@@ -68,12 +68,15 @@ public class BibCreator {
 						// Add the article to the file if valid.
 						String author1 = author.replaceAll(" and", ",");
 						int andIndex = author.indexOf("and");
-						String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al.") : author;
+						String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al") : author;
 						String author3 = author.replaceAll("and", "&");
 				
-						outWriters[i][0].println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
-						outWriters[i][1].println("["+articleCount+"]\t"+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
-						outWriters[i][2].println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
+						// IEEE
+						outWriters[i][0].println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".\r\n");
+						// ACM
+						outWriters[i][1].println("["+articleCount+"]\t"+author2+". "+year+". "+title+". "+journal+". "+volume+", "+number+" ("+year+"), "+pages+". DOI:https://doi.org/"+doi+".\r\n");
+						// NJ
+						outWriters[i][2].println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").\r\n");
 						articleCount++;
 					}	
 				}
