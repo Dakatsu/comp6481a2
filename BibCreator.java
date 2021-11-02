@@ -184,7 +184,7 @@ public class BibCreator {
 		for (int fileID = 1; fileID <= numFiles; fileID++) {
 			String[] prefixes = {"IEEE", "ACM", "NJ"};
 			for (int pfxID = 0; pfxID < prefixes.length; pfxID++) {
-				String fileName = prefixes[pfxID] + fileID + ".txt";
+				String fileName = prefixes[pfxID] + fileID + ".json";
 				try {
 					outFiles[fileID - 1][pfxID] = new File(fileName);
 					outWriters[fileID - 1][pfxID] = new PrintWriter(new FileOutputStream(outFiles[fileID - 1][pfxID]));
