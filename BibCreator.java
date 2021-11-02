@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -9,14 +8,42 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 
-
+/**
+ * BibCreator program for COMP 6481 Assignment 2.
+ * This program opens files named "LatexN.bib", where 1 <= N <= 10. It parses the articles inside them
+ * and prints them to ACM, IEEE, and NJ bibliography JSON files and allows the user to print one of the
+ * files to their screen before exiting.
+ * @author Parveen Kaur and Kyle Lange
+ */
 public class BibCreator {
+	/**
+	 * Array of scanners for reading Latex files.
+	 */
 	static Scanner[] inScanners;
+	
+	/**
+	 * Array of arrays of three output files.
+	 * These are used for deleting files.
+	 */
 	static File[][] outFiles;
+	
+	/**
+	 * Array of writers for outputting formatted bibliographies.
+	 */
 	static PrintWriter[][] outWriters;
 
-	static String author,journal,title,year,volume,number,pages,doi,ISSN,month;
+	/**
+	 * The text fields to parse from the Latex files.
+	 */
+	static String author, journal, title, year, volume, number, pages, doi, ISSN, month;
 	
+	/**
+	 * Validates each input file and outputs the formatted bibliographies to
+	 * the appropriate files. An issue with reading a file (empty or missing field)
+	 * will cause the output files to be deleted. All files must be opened before
+	 * this function is called. This function handles closing the inScanners and
+	 * outWriters once file reading/writing is not needed.
+	 */
 	public static void processFilesForValidation() {
 		// Process each file one at a time.
 		for (int i = 0; i < inScanners.length; i++) {
@@ -31,7 +58,7 @@ public class BibCreator {
 						author = journal = title = year = volume = number = pages = doi = ISSN = month = "";
 						while (!s.equals("}")) {
 							s = sc.nextLine();
-							format(s);
+							parseValue(s);
 						}
 						// Throw an exception if a field is missing.
 						if (author.isEmpty() || journal.isEmpty() || title.isEmpty() || year.isEmpty() || volume.isEmpty() 
@@ -70,7 +97,13 @@ public class BibCreator {
 		}
 	}
 	
-	public static void format(String s) throws FileInvalidException {
+	/**
+	 * Takes a key/value line from an article and writes the value into the appropriate key.
+	 * Does nothing if there is no equals sign present.
+	 * @param s The string from which to parse the value.
+	 * @throws FileInvalidException If the field is empty.
+	 */
+	public static void parseValue(String s) throws FileInvalidException {
 		if (s.indexOf('=') == -1) {
 			//System.out.println("FORMAT LINE: " + s);
 			return;
@@ -222,5 +255,4 @@ public class BibCreator {
 		}
 		System.out.println("Goodbye! Hope you have enjoyed creating the needed files using BibCreator.");
 	}
-
 }
