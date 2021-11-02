@@ -107,7 +107,6 @@ public class BibCreator {
 	 */
 	public static void parseValue(String s) throws FileInvalidException {
 		if (s.indexOf('=') == -1) {
-			//System.out.println("FORMAT LINE: " + s);
 			return;
 		}
 		
@@ -118,7 +117,6 @@ public class BibCreator {
 			throw new FileInvalidException("Field \"" + key + "\" is empty.");
 		}
 
-		//System.out.println(s.indexOf('{') + ", " + s.indexOf('}'));
 		String value = s.substring(s.indexOf('{') + 1, s.indexOf('}'));
 
 		switch(key) {
@@ -162,11 +160,7 @@ public class BibCreator {
 		// Open every input file and store their scanners in an array.
 		inScanners = new Scanner[numFiles];
 		for (int fileID = 1; fileID <= numFiles; fileID++) {
-			String fileName = "C:\\Users\\Sony\\Documents\\Concordia Study\\COMP6481\\Assignments\\Comp6481_F21_Assg2_Files\\Latex" + fileID +".bib";
-			// For Kyle's testing purposes.
-			if (args.length > 0) {
-				fileName = "Latex" + fileID + ".bib";
-			}
+			String fileName = "Latex" + fileID + ".bib"; // "C:\\Users\\Sony\\Documents\\Concordia Study\\COMP6481\\Assignments\\Comp6481_F21_Assg2_Files\\Latex" + fileID +".bib";
 			try {
 				inScanners[fileID - 1] = new Scanner(new FileInputStream(fileName));
 			}
