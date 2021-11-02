@@ -1,41 +1,31 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.io.File;
 import java.io.FileInputStream;
 
 
 public class BibCreator {
+	static Scanner[] inScanners;
+	static File[][] outFiles;
+	static PrintWriter[][] outWriters;
 
 	static String author,journal,title,year,volume,number,pages,doi,ISSN,month;
 	static int fileCount = 1;
 	
-	public static void processFilesForValidation(Scanner[] inputFiles) {
+	public static void processFilesForValidation() {
 		// Process each file one at a time.
-		for (int i = 0; i < inputFiles.length; i++) {
-			Scanner sc = inputFiles[i];
-			PrintWriter pw1 = null, pw2 = null, pw3 = null;
-			try
-			{
-				pw1 = new PrintWriter(new FileOutputStream("IEEE" + fileCount + ".txt"));
-				pw2 = new PrintWriter(new FileOutputStream("ACM" + fileCount + ".txt"));
-				pw3 = new PrintWriter(new FileOutputStream("NJ" + fileCount + ".txt"));
-			}
-			catch(FileNotFoundException e) 			// Since we are attempting to write to the file
-			{							   	// exception is automatically thrown if file cannot be created. 
-				System.out.println("Could not create a file to write to. "
-						+ " Please check for problems such as directory permission"
-						+ " or no available memory.");	
-				System.out.print("Program will terminate.");
-				System.exit(0);			   		   
-			}
+		for (int i = 0; i < inScanners.length; i++) {
+			Scanner sc = inScanners[i];
 			int articleCount = 1;
 			// Read the input file.
+			boolean fileIsValid = true;
 			while(sc.hasNextLine()) {
 				String s = sc.nextLine();
 				// If we come across an article, read its contents and add it to the file if it's valid.
 				if(s.startsWith("@ARTICLE{")) {
-					boolean bWriteArticleToFile = true;
 					while (!s.equals("}")) {
 						s = sc.nextLine();
 						try {
@@ -43,12 +33,12 @@ public class BibCreator {
 						}
 						// Stop reading this article if it is invalid.
 						catch (FileInvalidException e) {
-							System.out.println("Exception when reading file " + fileCount + "." + articleCount + ": " + e.getMessage());
-							bWriteArticleToFile = false;
+							System.out.println("Error: Detected Empty Field! " + fileCount + "." + articleCount + ": " + e.getMessage());
+							fileIsValid = false;
 							break;
 						}
 					}
-					if (bWriteArticleToFile) {
+					if (fileIsValid) {
 						System.out.println("File " + fileCount + "." + articleCount);
 				
 						String author1 = author.replaceAll(" and", ",");
@@ -56,9 +46,9 @@ public class BibCreator {
 						String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al.") : author;
 						String author3 = author.replaceAll("and", "&");
 				
-				        pw1.println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
-						pw2.println("[" + articleCount + "] "+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
-						pw3.println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
+						outWriters[i][0].println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
+						outWriters[i][1].println("[" + articleCount + "] "+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
+						outWriters[i][2].println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
 						articleCount++;
 					}
 					// Stop reading this file if there is an invalid article.
@@ -68,12 +58,15 @@ public class BibCreator {
 				}	
 			}
 			fileCount++;
-			// Close the output writers.
-			pw1.close();
-			pw2.close();
-			pw3.close();
-			// Close file after reading.
-			inputFiles[i].close();
+			// Close the output writers. Delete the output files if input is invalid.
+			for (int j = 0; j < 3; j++) {
+				outWriters[i][j].close();
+				if (!fileIsValid) {
+					outFiles[i][j].delete();
+				}
+			}
+			// Close input file after reading.
+			sc.close();
 		}
 	}
 	
@@ -132,31 +125,69 @@ public class BibCreator {
 	} 
 	
 	public static void main(String[] args) {
+		int numFiles = 10;
 		// Open every input file and store their scanners in an array.
-		Scanner[] inputFiles = new Scanner[10];
-		for (int fileID = 1; fileID <= inputFiles.length; fileID++) {
+		inScanners = new Scanner[numFiles];
+		for (int fileID = 1; fileID <= numFiles; fileID++) {
 			String fileName = "C:\\Users\\Sony\\Documents\\Concordia Study\\COMP6481\\Assignments\\Comp6481_F21_Assg2_Files\\Latex" + fileID +".bib";
 			// For Kyle's testing purposes.
 			if (args.length > 0) {
 				fileName = "Latex" + fileID + ".bib";
 			}
 			try {
-				inputFiles[fileID - 1] = new Scanner(new FileInputStream(fileName));
+				inScanners[fileID - 1] = new Scanner(new FileInputStream(fileName));
 			}
+			// If we cannot open a file, close all previously opened files and exit.
 			catch(FileNotFoundException e) {
 				System.out.println("Could not open input file " + fileName + " for reading." + 
-						"\n\nPlease check if file exists! Program will terminate after closing any opened files");	
-				// Close open files before exit.
-				for (int i = 0; i < fileID; i++) {
-					inputFiles[i].close();
+						"\n\nPlease check if file exists! Program will terminate after closing any opened files.");	
+				for (int i = 0; inScanners[i] != null; i++) {
+					inScanners[i].close();
 				}
 				System.exit(0);			   
 			}
 		}
 		
+		// Open/create every output file.
+		outFiles = new File[numFiles][3];
+		outWriters = new PrintWriter[numFiles][3];
+		for (int fileID = 1; fileID <= numFiles; fileID++) {
+			String[] prefixes = {"IEEE", "ACM", "NJ"};
+			for (int pfxID = 0; pfxID < prefixes.length; pfxID++) {
+				String fileName = prefixes[pfxID] + fileID + ".txt";
+				try {
+					outFiles[fileID - 1][pfxID] = new File(fileName);
+					outWriters[fileID - 1][pfxID] = new PrintWriter(new FileOutputStream(outFiles[fileID - 1][pfxID]));
+				}
+				catch (Exception e) {
+					System.out.println("Could not create output file " + fileName + "\nAll created files will be deleted before exit.");
+					// Close and delete output files before exit.
+					// Put in a try/catch to swallow any possible null pointers.
+					try {
+						for (int i = 0; i <= fileID; i++) {
+							for (int j = 0; j < prefixes.length; j++) {
+								outWriters[i][j].close();
+								outFiles[i][j].delete();
+							}
+						}
+					}
+					catch (Exception exception) {
+						// Do nothing.
+					}
+					// Close input files before exit.
+					for (Scanner inFile : inScanners) {
+						inFile.close();
+					}
+					System.exit(0);
+				}
+			}
+		}
+		
 		// Process all the files.
-		processFilesForValidation(inputFiles);
-		System.out.println("All files processed!");
+		processFilesForValidation();
+		
+		// Allow the user to open and display one file.
+		System.out.println("Please enter the name of one of the files you need to review:");
 	}
 
 }
