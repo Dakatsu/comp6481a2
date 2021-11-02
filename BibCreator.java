@@ -8,38 +8,66 @@ import java.io.FileInputStream;
 public class BibCreator {
 
 	static String author,journal,title,year,volume,number,pages,doi,ISSN,month;
-	static int filecounter=1,countfile=1;
+	static int articleCount = 1, fileCount = 1;
 	
-	public static void processFilesForValidation() {
-		System.out.println("File " + countfile + "." + filecounter);
-		PrintWriter pw1 = null, pw2 = null, pw3 = null;	
-		try
-		{
-			pw1 = new PrintWriter(new FileOutputStream("IEEE" + countfile + ".txt", true));
-			pw2 = new PrintWriter(new FileOutputStream("ACM" + countfile + ".txt", true));
-			pw3 = new PrintWriter(new FileOutputStream("NJ" + countfile + ".txt", true));
+	public static void processFilesForValidation(Scanner[] inputFiles) {
+		for (int i = 0; i < inputFiles.length; i++) {
+			Scanner sc = inputFiles[i];
+			articleCount = 1;
+			while(sc.hasNextLine()) {
+				String s = sc.nextLine();
+				if(s.startsWith("@ARTICLE{")) {
+					boolean bShouldWriteToFile = true;
+					while (!s.equals("}")) {
+						s = sc.nextLine();
+						try {
+							format(s);
+						}
+						catch (FileInvalidException e) {
+							System.out.println("Exception when reading file " + fileCount +  ": " + e.getMessage());
+							bShouldWriteToFile = false;
+						}
+					}
+					if (bShouldWriteToFile) {
+						System.out.println("File " + fileCount + "." + articleCount);
+						PrintWriter pw1 = null, pw2 = null, pw3 = null;	
+						try
+						{
+							pw1 = new PrintWriter(new FileOutputStream("IEEE" + fileCount + ".txt", true));
+							pw2 = new PrintWriter(new FileOutputStream("ACM" + fileCount + ".txt", true));
+							pw3 = new PrintWriter(new FileOutputStream("NJ" + fileCount + ".txt", true));
+						}
+						catch(FileNotFoundException e) 			// Since we are attempting to write to the file
+						{							   	// exception is automatically thrown if file cannot be created. 
+							System.out.println("Could not create a file to write to. "
+									+ " Please check for problems such as directory permission"
+									+ " or no available memory.");	
+							System.out.print("Program will terminate.");
+							System.exit(0);			   		   
+						}
+				
+						String author1 = author.replaceAll(" and", ",");
+						int andIndex = author.indexOf("and");
+						String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al.") : author;
+						String author3 = author.replaceAll("and", "&");
+				
+				        pw1.println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
+						pw1.close();
+						pw2.println("[" + articleCount + "] "+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
+						pw2.close();
+						pw3.println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
+						pw3.close();
+						articleCount++;
+					}
+					else {
+						break;
+					}
+				}	
+			}
+			fileCount++;
+			// Close file after reading.
+			inputFiles[i].close();
 		}
-		catch(FileNotFoundException e) 			// Since we are attempting to write to the file
-		{							   	// exception is automatically thrown if file cannot be created. 
-			System.out.println("Could not create a file to write to. "
-					+ " Please check for problems such as directory permission"
-					+ " or no available memory.");	
-			System.out.print("Program will terminate.");
-			System.exit(0);			   		   
-		}
-
-		String author1 = author.replaceAll(" and", ",");
-		int andIndex = author.indexOf("and");
-		String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al.") : author;
-		String author3 = author.replaceAll("and", "&");
-
-        pw1.println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
-		pw1.close();
-		pw2.println("[" + filecounter + "] "+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
-		pw2.close();
-		pw3.println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
-		pw3.close();
-		filecounter++;
 	}
 	
 	public static void format(String s) throws FileInvalidException {
@@ -97,52 +125,30 @@ public class BibCreator {
 	} 
 	
 	public static void main(String[] args) {
-		Scanner[] fileInput = new Scanner[10];
-		for (int fileID = 1; fileID <= fileInput.length; fileID++) {
+		// Open every input file and store their scanners in an array.
+		Scanner[] inputFiles = new Scanner[10];
+		for (int fileID = 1; fileID <= inputFiles.length; fileID++) {
 			String fileName = "C:\\Users\\Sony\\Documents\\Concordia Study\\COMP6481\\Assignments\\Comp6481_F21_Assg2_Files\\Latex" + fileID +".bib";
 			// For Kyle's testing purposes.
 			if (args.length > 0) {
 				fileName = "Latex" + fileID + ".bib";
 			}
 			try {
-				System.out.println("Opening file: " + fileName);
-				fileInput[fileID - 1] = new Scanner(new FileInputStream(fileName));				     
+				inputFiles[fileID - 1] = new Scanner(new FileInputStream(fileName));
 			}
 			catch(FileNotFoundException e) {
-				System.out.println("Could not open input file for reading. Please check if file exists: " + fileName);	
-				System.out.print("Program will terminate.");
+				System.out.println("Could not open input file " + fileName + " for reading." + 
+						"\n\nPlease check if file exists! Program will terminate after closing any opened files");	
 				// Close open files before exit.
 				for (int i = 0; i < fileID; i++) {
-					fileInput[i].close();
+					inputFiles[i].close();
 				}
 				System.exit(0);			   
 			}
 		}
 		
-		while(countfile<=10) {
-			Scanner sc = fileInput[countfile - 1];
-
-			filecounter = 1;
-			while(sc.hasNextLine()) {
-				String s = sc.nextLine();
-				if(s.startsWith("@ARTICLE{")) {
-					while (!s.equals("}")) {
-						s = sc.nextLine();
-						try {
-							format(s);
-						}
-						catch (FileInvalidException e) {
-							System.out.println("Exception on file " + countfile +  ": " + e.getMessage());
-							System.exit(0);
-						}
-					}
-					processFilesForValidation();
-				}	
-			}
-			countfile++;
-			// Close file after reading.
-			//fileInput[countfile - 1].close();
-		}
+		// Process all the files.
+		processFilesForValidation(inputFiles);
 		System.out.println("All files processed!");
 	}
 
