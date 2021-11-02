@@ -29,6 +29,7 @@ public class BibCreator {
 				String s = sc.nextLine();
 				// If we come across an article, read its contents and add it to the file if it's valid.
 				if(s.startsWith("@ARTICLE{")) {
+					author = journal = title = year = volume = number = pages = doi = ISSN = month = "";
 					while (!s.equals("}")) {
 						s = sc.nextLine();
 						try {
@@ -41,6 +42,12 @@ public class BibCreator {
 							break;
 						}
 					}
+					// Double check that we got every field.
+					if (author.isEmpty() || journal.isEmpty() || title.isEmpty() || year.isEmpty() || volume.isEmpty() 
+							|| number.isEmpty() || pages.isEmpty() || doi.isEmpty() || ISSN.isEmpty() || month.isEmpty()) {
+						fileIsValid = false;
+					}
+					// Add the article to the file if valid.
 					if (fileIsValid) {
 						System.out.println("File " + fileCount + "." + articleCount);
 				
@@ -120,9 +127,6 @@ public class BibCreator {
 		case "month":  
 			month = value;
 			break;
-		default:
-			// Do nothing.
-			//System.out.println("No case matched");
 		}
 
 	} 
@@ -190,6 +194,7 @@ public class BibCreator {
 		processFilesForValidation();
 		
 		// Allow the user to open and display one file.
+		// Give them two chances to enter a proper file name.
 		Scanner keyboard = new Scanner(System.in);
 		System.out.println("Please enter the name of one of the files you need to review:");
 		BufferedReader inFile = null;
