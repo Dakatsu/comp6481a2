@@ -16,7 +16,6 @@ public class BibCreator {
 	static PrintWriter[][] outWriters;
 
 	static String author,journal,title,year,volume,number,pages,doi,ISSN,month;
-	static int fileCount = 1;
 	
 	public static void processFilesForValidation() {
 		// Process each file one at a time.
@@ -24,32 +23,23 @@ public class BibCreator {
 			Scanner sc = inScanners[i];
 			int articleCount = 1;
 			// Read the input file.
-			boolean fileIsValid = true;
-			while(sc.hasNextLine()) {
-				String s = sc.nextLine();
-				// If we come across an article, read its contents and add it to the file if it's valid.
-				if(s.startsWith("@ARTICLE{")) {
-					author = journal = title = year = volume = number = pages = doi = ISSN = month = "";
-					while (!s.equals("}")) {
-						s = sc.nextLine();
-						try {
+			try {
+				while(sc.hasNextLine()) {
+					String s = sc.nextLine();
+					// If we come across an article, read its contents and add it to the file.
+					if(s.startsWith("@ARTICLE{")) {
+						author = journal = title = year = volume = number = pages = doi = ISSN = month = "";
+						while (!s.equals("}")) {
+							s = sc.nextLine();
 							format(s);
 						}
-						// Stop reading this article if it is invalid.
-						catch (FileInvalidException e) {
-							System.out.println("Error: Detected Empty Field! " + fileCount + "." + articleCount + ": " + e.getMessage());
-							fileIsValid = false;
-							break;
+						// Throw an exception if a field is missing.
+						if (author.isEmpty() || journal.isEmpty() || title.isEmpty() || year.isEmpty() || volume.isEmpty() 
+								|| number.isEmpty() || pages.isEmpty() || doi.isEmpty() || ISSN.isEmpty() || month.isEmpty()) {
+							throw new FileInvalidException("Field is missing.");
 						}
-					}
-					// Double check that we got every field.
-					if (author.isEmpty() || journal.isEmpty() || title.isEmpty() || year.isEmpty() || volume.isEmpty() 
-							|| number.isEmpty() || pages.isEmpty() || doi.isEmpty() || ISSN.isEmpty() || month.isEmpty()) {
-						fileIsValid = false;
-					}
-					// Add the article to the file if valid.
-					if (fileIsValid) {
-						System.out.println("File " + fileCount + "." + articleCount);
+						// Add the article to the file if valid.
+						System.out.println("File " + (i + 1) + "." + articleCount);
 				
 						String author1 = author.replaceAll(" and", ",");
 						int andIndex = author.indexOf("and");
@@ -60,18 +50,18 @@ public class BibCreator {
 						outWriters[i][1].println("[" + articleCount + "]\t"+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
 						outWriters[i][2].println(author3+". "+title+". "+journal+". "+volume+", "+pages+"("+year+").");
 						articleCount++;
-					}
-					// Stop reading this file if there is an invalid article.
-					else {
-						break;
-					}
-				}	
+					}	
+				}
+				// Close output writers once file has been read.
+				for (int j = 0; j < 3; j++) {
+					outWriters[i][j].close();
+				}
 			}
-			fileCount++;
-			// Close the output writers. Delete the output files if input is invalid.
-			for (int j = 0; j < 3; j++) {
-				outWriters[i][j].close();
-				if (!fileIsValid) {
+			// If file is invalid, close and delete the output files.
+			catch (FileInvalidException e) {
+				System.out.println("Error: Detected Empty Field! " + (i + 1) + "." + articleCount + ": " + e.getMessage());
+				for (int j = 0; j < 3; j++) {
+					outWriters[i][j].close();
 					outFiles[i][j].delete();
 				}
 			}
