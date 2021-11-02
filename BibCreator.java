@@ -11,7 +11,7 @@ public class BibCreator {
 	static int filecounter=1,countfile=1;
 	
 	public static void processFilesForValidation() {
-		System.out.println("File " + filecounter);
+		System.out.println("File " + countfile + "." + filecounter);
 		PrintWriter pw1 = null, pw2 = null, pw3 = null;	
 		try
 		{
@@ -33,7 +33,7 @@ public class BibCreator {
 		String author2 = andIndex != -1 ? author.replaceAll(author.substring(andIndex,author.length()), "et al.") : author;
 		String author3 = author.replaceAll("and", "&");
 
-		pw1.println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
+        pw1.println(author1+". \""+title+"\", "+journal+", vol. "+volume+", no. "+number+", p. "+pages+", "+month+" "+year+".");
 		pw1.close();
 		pw2.println("[" + filecounter + "] "+author2+" "+title+". "+journal+". "+volume+", "+number+" (+"+year+"), "+pages+". DOI:https://doi.org/"+doi+".");
 		pw2.close();
@@ -48,13 +48,14 @@ public class BibCreator {
 			return;
 		}
 		
+		String key = s.substring(0, s.indexOf('='));
+		
 		// Handles empty field.
 		if (s.indexOf('{') == -1 || s.indexOf('}') == -1 || s.indexOf('}') - s.indexOf('{') < 2) {
-			throw new FileInvalidException();
+			throw new FileInvalidException("Empty field when reading key: " + key);
 		}
 
-		String key = s.substring(0, s.indexOf('='));
-		System.out.println(s.indexOf('{') + ", " + s.indexOf('}'));
+		//System.out.println(s.indexOf('{') + ", " + s.indexOf('}'));
 		String value = s.substring(s.indexOf('{') + 1, s.indexOf('}'));
 
 		switch(key) {
@@ -96,29 +97,34 @@ public class BibCreator {
 	} 
 	
 	public static void main(String[] args) {
-		Scanner sc = null;		// A scanner object ,
-		while(countfile<=10) {
-			try
-			{
-				String filename = "C:\\Users\\Sony\\Documents\\Concordia Study\\COMP6481\\Assignments\\Comp6481_F21_Assg2_Files\\Latex"+countfile+".bib";
-				// For Kyle's testing purposes.
-				if (args.length > 0) {
-					filename = "Latex" + countfile + ".bib";
-				}
-				System.out.println(filename);
-				sc = new Scanner(new FileInputStream(filename));				     
+		Scanner[] fileInput = new Scanner[10];
+		for (int fileID = 1; fileID <= fileInput.length; fileID++) {
+			String fileName = "C:\\Users\\Sony\\Documents\\Concordia Study\\COMP6481\\Assignments\\Comp6481_F21_Assg2_Files\\Latex" + fileID +".bib";
+			// For Kyle's testing purposes.
+			if (args.length > 0) {
+				fileName = "Latex" + fileID + ".bib";
 			}
-			catch(FileNotFoundException e) 
-			{							   
-				System.out.println("Could not open input file for reading."+ " Please check if file exists.");	
+			try {
+				System.out.println("Opening file: " + fileName);
+				fileInput[fileID - 1] = new Scanner(new FileInputStream(fileName));				     
+			}
+			catch(FileNotFoundException e) {
+				System.out.println("Could not open input file for reading. Please check if file exists: " + fileName);	
 				System.out.print("Program will terminate.");
+				// Close open files before exit.
+				for (int i = 0; i < fileID; i++) {
+					fileInput[i].close();
+				}
 				System.exit(0);			   
 			}
+		}
+		
+		while(countfile<=10) {
+			Scanner sc = fileInput[countfile - 1];
 
-			String s;
 			filecounter = 1;
 			while(sc.hasNextLine()) {
-				s = sc.nextLine();
+				String s = sc.nextLine();
 				if(s.startsWith("@ARTICLE{")) {
 					while (!s.equals("}")) {
 						s = sc.nextLine();
@@ -126,18 +132,17 @@ public class BibCreator {
 							format(s);
 						}
 						catch (FileInvalidException e) {
-							System.out.println("TODO EXCEPTION");
+							System.out.println("Exception on file " + countfile +  ": " + e.getMessage());
 							System.exit(0);
 						}
 					}
 					processFilesForValidation();
 				}	
 			}
-			System.out.println("hello2");
 			countfile++;
-			System.out.println("hello3");
+			// Close file after reading.
+			//fileInput[countfile - 1].close();
 		}
-		sc.close();
 		System.out.println("All files processed!");
 	}
 
