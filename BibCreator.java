@@ -38,6 +38,11 @@ public class BibCreator {
 	static String author, journal, title, year, volume, number, pages, doi, ISSN, month;
 	
 	/**
+	 * The number of valid files read.
+	 */
+	static int numValidFiles = 0;
+	
+	/**
 	 * Validates each input file and outputs the formatted bibliographies to
 	 * the appropriate files. An issue with reading a file (empty or missing field)
 	 * will cause the output files to be deleted. All files must be opened before
@@ -84,6 +89,7 @@ public class BibCreator {
 				for (int j = 0; j < 3; j++) {
 					outWriters[i][j].close();
 				}
+				numValidFiles++;
 			}
 			// If file is invalid, close and delete the output files.
 			catch (FileInvalidException e) {
@@ -215,6 +221,9 @@ public class BibCreator {
 		
 		// Process all the files.
 		processFilesForValidation();
+		
+		// Output the meta results (num valid/invalid files).
+		System.out.println("A total of " + (numFiles - numValidFiles) + " files were invalid, and could not be processed. All other " + numValidFiles + " \"Valid\" files have been created.");
 		
 		// Allow the user to open and display one file.
 		// Give them two chances to enter a proper file name.
