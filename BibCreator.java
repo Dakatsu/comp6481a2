@@ -13,7 +13,7 @@ import java.io.FileInputStream;
  * This program opens files named "LatexN.bib", where 1 <= N <= 10. It parses the articles inside them
  * and prints them to ACM, IEEE, and NJ bibliography JSON files and allows the user to print one of the
  * files to their screen before exiting.
- * @author Parveen Kaur and Kyle Lange
+ * @author Parveen Kaur (40171245) and Kyle Lange (27627696)
  */
 public class BibCreator {
 	/**
