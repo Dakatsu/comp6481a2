@@ -1,3 +1,4 @@
+package assignment;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -41,6 +42,11 @@ public class BibCreator {
 	 * The number of valid files read.
 	 */
 	static int numValidFiles = 0;
+	
+	/**
+	 * The text field to display requested file content.
+	 */
+	static String displayfilename;
 	
 	/**
 	 * Validates each input file and outputs the formatted bibliographies to
@@ -228,20 +234,23 @@ public class BibCreator {
 		// Allow the user to open and display one file.
 		// Give them two chances to enter a proper file name.
 		Scanner keyboard = new Scanner(System.in);
-		System.out.println("Please enter the name of one of the files you need to review:");
+		System.out.println("\nPlease enter the name of one of the files that you need to review:");
 		BufferedReader inFile = null;
 		try {
-			inFile = new BufferedReader(new FileReader(keyboard.nextLine()));
+			displayfilename = keyboard.nextLine();
+			inFile = new BufferedReader(new FileReader(displayfilename));
 		}
 		catch (FileNotFoundException e) {
 			System.out.println("Could not open input file. File does not exist; possibly it could not be created!"
 					+ "\n\nHowever, you will be allowed another chance to enter another file name."
 					+ "\nPlease enter the name of one of the files that you need to review:");
 			try {
-				inFile = new BufferedReader(new FileReader(keyboard.nextLine()));
+				displayfilename = keyboard.nextLine();
+				inFile = new BufferedReader(new FileReader(displayfilename));
 			}
 			catch (FileNotFoundException e2) {
-				System.out.println("Sorry! I am unable to display your desired files! Program will exit!");
+				System.out.println("\nCould not open input file again! Either file does not exist or could not be created."
+						+ "\nSorry! I am unable to display your desired files! Program will exit!");
 				keyboard.close();
 				System.exit(0);
 			}
@@ -250,7 +259,7 @@ public class BibCreator {
 		
 		// Display the file if successfully opened.
 		if (inFile != null) {
-			System.out.println("Here are the contents of the successfully created File:\n");
+			System.out.println("Here are the contents of the successfully created Json File:"+displayfilename+"\n");
 			try {
 				String line = inFile.readLine();
 				while (line != null) {
