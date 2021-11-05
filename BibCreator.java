@@ -1,4 +1,3 @@
-package assignment;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -42,11 +41,6 @@ public class BibCreator {
 	 * The number of valid files read.
 	 */
 	static int numValidFiles = 0;
-	
-	/**
-	 * The text field to display requested file content.
-	 */
-	static String displayfilename;
 	
 	/**
 	 * Validates each input file and outputs the formatted bibliographies to
@@ -236,17 +230,19 @@ public class BibCreator {
 		Scanner keyboard = new Scanner(System.in);
 		System.out.println("\nPlease enter the name of one of the files that you need to review:");
 		BufferedReader inFile = null;
+		// The text field to display requested file content.
+		String displayfileName = "";
 		try {
-			displayfilename = keyboard.nextLine();
-			inFile = new BufferedReader(new FileReader(displayfilename));
+			displayfileName = keyboard.nextLine();
+			inFile = new BufferedReader(new FileReader(displayfileName));
 		}
 		catch (FileNotFoundException e) {
 			System.out.println("Could not open input file. File does not exist; possibly it could not be created!"
 					+ "\n\nHowever, you will be allowed another chance to enter another file name."
 					+ "\nPlease enter the name of one of the files that you need to review:");
 			try {
-				displayfilename = keyboard.nextLine();
-				inFile = new BufferedReader(new FileReader(displayfilename));
+				displayfileName = keyboard.nextLine();
+				inFile = new BufferedReader(new FileReader(displayfileName));
 			}
 			catch (FileNotFoundException e2) {
 				System.out.println("\nCould not open input file again! Either file does not exist or could not be created."
@@ -259,7 +255,7 @@ public class BibCreator {
 		
 		// Display the file if successfully opened.
 		if (inFile != null) {
-			System.out.println("Here are the contents of the successfully created Json File:"+displayfilename+"\n");
+			System.out.println("Here are the contents of the successfully created Json File:" + displayfileName + "\n");
 			try {
 				String line = inFile.readLine();
 				while (line != null) {
